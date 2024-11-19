@@ -15,6 +15,7 @@ CEILING_LENGTH = FLOOR_LENGTH
 running = True
 clock = 0
 animate = 0
+window_dimensions = (900, 600)
 
 def main():
     init()
@@ -22,7 +23,11 @@ def main():
 
 
 def init():
-    pass
+    pygame.init()
+    screen = pygame.display.set_mode(window_dimensions, pygame.DOUBLEBUF|pygame.OPENGL)
+    clock = pygame.time.Clock()
+    pygame.key.set_repeat(300, 50)  # Key repeat rate
+    running = True
 
 def main_loop():
     global running, clock, animate
@@ -47,7 +52,15 @@ def createFloor(width, length, texture1, texture2):
 def createCeiling():
     pass
 
-def draw_plane(width, height):
-    pass
+def draw_plane(width, height, texture):
+    glBindTexture(GL_TEXTURE_2D, texture)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+
+
+    glEnable(GL_TEXTURE_2D)
+
+    glBegin(GL_QUADS)
+    
+
 
 if __name__ == "__main__" : main()
