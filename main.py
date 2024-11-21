@@ -12,9 +12,9 @@ WALL_HEIGHT = 10
 WALL_LENGTH = 30
 CEILING_WIDTH = FLOOR_WIDTH
 CEILING_LENGTH = FLOOR_LENGTH
-X_BOUND = None
+X_BOUND = 29
 Y_BOUND = None
-Z_BOUND = None
+Z_BOUND = 29
 FLASH_ANGLE = 0
 FPS = 30.0
 
@@ -88,6 +88,16 @@ def keyboard(event):
         print(camera.eye.x)
         print(camera.eye.y)
         print(camera.eye.z)
+
+    if(camera.eye.z < 0):
+        camera.eye.z = 0
+    elif(camera.eye.z > Z_BOUND):
+        camera.eye.z = Z_BOUND
+
+    if(camera.eye.x < -X_BOUND/2.0):
+        camera.eye.x = -X_BOUND/2.0
+    elif(camera.eye.x > X_BOUND/2.0):
+        camera.eye.x = X_BOUND/2.0
 
 def main_loop():
     global running, clock, animate
@@ -165,7 +175,7 @@ def flashlight(light):
     glEnable(light)
     glPopMatrix()
 
-#TODO create four walls around floor
+#Creates four walls around the floor using the constants defined at the top
 def createWalls():
     glPushMatrix()
     draw_plane(WALL_LENGTH, WALL_HEIGHT, wall_tex_name)
@@ -179,6 +189,9 @@ def createWalls():
     draw_plane(WALL_LENGTH, WALL_HEIGHT, wall_tex_name)
     glPopMatrix()
 
+def createTable():
+    gluQuadricNormals
+
 
 #TODO Create checkerboard floor
 def createFloor():
@@ -186,20 +199,10 @@ def createFloor():
     glRotate(90, 90, 0, 0)
     draw_plane(FLOOR_LENGTH, FLOOR_WIDTH, floor_tex_name)
     glPopMatrix()
-def generate_checkerboard_texture(nrows, ncols, block_size, block_colors):
-    """
-    * Generate a texture in the form of a checkerboard 
-    * nrows = number of checker rows
-    * ncols = number of checker cols
-    * block_size = number of texels per checker square
-    * block_colors = RGBA colors of each square (2 or more repeated)
-    """
-    color_size = len(block_colors[0])
-    if color_size != 4:
-        print("Error: Currently only RGBA supported here. Texture not generated.")
-        return None
 
-     # Create the array of texels (note 1-d)
+def generate_checkerboard_texture(nrows, ncols, block_size, block_colors):
+    color_size = len(block_colors[0])
+
     texture = [0]*(nrows*ncols*block_size*block_size*color_size)
     idx = 0
     for i in range(nrows):
