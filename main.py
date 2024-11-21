@@ -12,10 +12,13 @@ WALL_HEIGHT = 10
 WALL_LENGTH = 10
 CEILING_WIDTH = FLOOR_WIDTH
 CEILING_LENGTH = FLOOR_LENGTH
+X_BOUND = None
+Y_BOUND = None
+Z_BOUND = None
 FPS = 30.0
 
-ceiling_name = "BilliardTable/textures/ceiling.png"
-wall_name = "BilliardTable/textures/wall.png"
+ceiling_name = "textures/ceiling.png"
+wall_name = "textures/wall.png"
 ceiling_tex_name = None
 wall_tex_name = None
 
@@ -57,10 +60,29 @@ def keyboard(event):
     key = event.key
     if(key == 27):
         running = False
+    elif(key == ord("a")):
+        camera.turn(1)
+    elif(key == ord("d")):
+        camera.turn(-1)
+    elif(key == ord("s")):
+        camera.slide(0, 0, 1)
+    elif(key == ord("w")):
+        camera.slide(0, 0, -1)
+    elif(key == ord("q")):
+        camera.slide(0, 1, 0)
+    elif(key == ord("e")):
+        camera.slide(0, -1, 0)
 
 def main_loop():
     global running, clock, animate
     while running:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                keyboard(event)
+
         display()
 
         pygame.display.flip()
@@ -73,8 +95,8 @@ def display():
 
     glViewport(0, 0, width, height)
     camera.setProjection()
-    glClearColor(0, 0, 0, 0)
-
+    glClearColor(0.0, 0.0, 0.0, 0.0)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glFlush()
     
     drawScene()
@@ -91,8 +113,8 @@ def drawScene():
     #createWalls()
 
     glPushMatrix()
+    glTranslate(0, 10, 0)
     glRotate(90, 90, 0, 0)
-    glTranslate(0, 3, 0)
     createCeiling()
     glPopMatrix()
     #createFloor()
@@ -109,8 +131,9 @@ def createFloor(width, length, texture1, texture2):
 
 #TODO Create any textured ceiling
 def createCeiling():
-    draw_plane(5, 5, ceiling_tex_name)
+    draw_plane(30, 30, ceiling_tex_name)
 
+#Generates the texture based on the provided filename and the desired storage
 def createTexture(tName, fName):
     img = Image.open(fName)
     x = img.size[0]
@@ -120,6 +143,7 @@ def createTexture(tName, fName):
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, text)
 
 
+#Creates a plane based on the provided width, height, and texture
 def draw_plane(width, height, texture):
     glBindTexture(GL_TEXTURE_2D, texture)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
@@ -128,6 +152,7 @@ def draw_plane(width, height, texture):
     glEnable(GL_TEXTURE_2D)
     glBegin(GL_QUADS)
 
+    #Two points of each corner in the texture (x1, y1) , (x2, y2)
     x1 = width/2.0
     y1 = height
     x2 = -x1
