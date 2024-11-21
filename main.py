@@ -88,6 +88,9 @@ def keyboard(event):
         print(camera.eye.x)
         print(camera.eye.y)
         print(camera.eye.z)
+    elif(key == ord(" ")):
+        camera.eye.x = 2
+        camera.eye.z = 15
 
     if(camera.eye.z < 0):
         camera.eye.z = 0
