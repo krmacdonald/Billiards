@@ -16,7 +16,7 @@ from utils import *
 class Camera:
     """A simple 3D Camera System"""
 
-    def __init__(self, camAngle=45, aspRatio=1, near=0.1, far=1000, eye=Point(0,0,0), lookAngle=0):
+    def __init__(self, camAngle=45, aspRatio=1, near=0.1, far=1000, eye=Point(0,0,0), lookAngle=0, upAngle=90):
         """A constructor for Camera class using initial default values.
            eye is a Point
            lookAngle is the angle that camera is looking in measured in degrees
@@ -27,6 +27,7 @@ class Camera:
         self.far = far
         self.eye = eye
         self.lookAngle = lookAngle
+        self.upAngle = upAngle
 
     def __str__(self):
         """Basic string representation of this Camera"""
@@ -44,8 +45,9 @@ class Camera:
 
         # Compute the look at point based on the turn angle
         rad = math.radians(self.lookAngle)
+        radTWO = math.radians(self.upAngle)
         lookX = self.eye.x - math.sin(rad)
-        lookY = self.eye.y
+        lookY = self.eye.y - math.cos(radTWO)
         lookZ = self.eye.z - math.cos(rad)
 
         # Place the camera
