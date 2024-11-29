@@ -88,6 +88,10 @@ def keyboard(event):
         print(camera.eye.x)
         print(camera.eye.y)
         print(camera.eye.z)
+    elif(key == ord("m")): #home camera
+        camera.eye = utils.Point(2, 3, 15) #initial eye
+    elif(key == ord("n")): #level gaze
+        camera.upAngle = 90 #flat up angle
 
     if(camera.eye.z < 0):
         camera.eye.z = 0
