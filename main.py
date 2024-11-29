@@ -92,6 +92,9 @@ def keyboard(event):
         camera.eye = utils.Point(2, 3, 15) #initial eye
     elif(key == ord("n")): #level gaze
         camera.upAngle = 90 #flat up angle
+    elif(key == ord(" ")):
+        camera.eye.x = 2
+        camera.eye.z = 15
 
     if(camera.eye.z < 0):
         camera.eye.z = 0
@@ -154,13 +157,13 @@ def flashlight(light):
     glMatrixMode(GL_MODELVIEW)
     glPushMatrix()
     glLoadIdentity()
-    posArr = [camera.eye.x-1, camera.eye.y, camera.eye.z - 1]
+    posArr = [camera.eye.x, camera.eye.y, camera.eye.z, 3]
     light_position = posArr
     rad = math.radians(FLASH_ANGLE)
     light_direction = [ math.sin(rad), 0.0, -math.cos(rad), 0.0]
     light_ambient = [ 1.0, 1.0, 1.0, 1.0 ]
     light_diffuse = [ 1.0, 1.0, 1.0, 1.0 ]
-    light_specular = [ 1.0, 1.0, 1.0, 1.0 ]
+    light_specular = [ 0.0, 1.0, 1.0, 1.0 ]
 
     # For Light 0, set position, ambient, diffuse, and specular values
     glLightfv(light, GL_POSITION, light_position)
@@ -169,13 +172,13 @@ def flashlight(light):
     glLightfv(light, GL_SPECULAR, light_specular)
 
     glLightfv(light, GL_SPOT_DIRECTION, light_direction)
-    glLightf(light, GL_SPOT_CUTOFF, 15.0)
-    glLightf(light, GL_SPOT_EXPONENT, 0.0)
+    glLightf(light, GL_SPOT_CUTOFF, 30.0)
+    glLightf(light, GL_SPOT_EXPONENT, 5.0)
 
     # Distance attenuation
     glLightf(light, GL_CONSTANT_ATTENUATION, 1.0)
-    glLightf(light, GL_LINEAR_ATTENUATION, 0.10)
-    glLightf(light, GL_QUADRATIC_ATTENUATION, 0.00)
+    glLightf(light, GL_LINEAR_ATTENUATION, 0.02)
+    glLightf(light, GL_QUADRATIC_ATTENUATION, 0.005)
     glEnable(light)
     glPopMatrix()
 
@@ -248,38 +251,48 @@ def createTexture(tName, fName):
 
 
 #Creates a plane based on the provided width, height, and texture
-def draw_plane(width, height, texture):
+def draw_plane(width, height, texture, divisions_x=10, divisions_y=10):
     glBindTexture(GL_TEXTURE_2D, texture)
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE) # try GL_DECAL/GL_REPLACE/GL_MODULATE
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)           # try GL_NICEST/GL_FASTEST
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)  # try GL_CLAMP/GL_REPEAT/GL_CLAMP_TO_EDGE
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST) # try GL_LINEAR/GL_NEAREST
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 
 
     glEnable(GL_TEXTURE_2D)
     glBegin(GL_QUADS)
 
-    #Two points of each corner in the texture (x1, y1) , (x2, y2)
-    x1 = width/2.0
-    y1 = height
-    x2 = -x1
-    y2 = 0
+    step_x = width / divisions_x
+    step_y = height / divisions_y
+    tex_step_x = 4.0 / divisions_x
+    tex_step_y = 4.0 / divisions_y
 
-    
+    for i in range(divisions_x):
+        for j in range(divisions_y):
+            x1 = -width / 2.0 + i * step_x
+            x2 = x1 + step_x
+            y1 = j * step_y
+            y2 = y1 + step_y
 
-    glTexCoord2f(0, 0)
-    glVertex3f(x2, y2, 0)
-    glTexCoord2f(4, 0)
-    glVertex3f(x1, y2, 0)
-    glTexCoord2f(4, 4)
-    glVertex3f(x1, y1, 0)
-    glTexCoord2f(0, 4)
-    glVertex3f(x2, y1, 0)
+            u1 = i * tex_step_x
+            u2 = u1 + tex_step_x
+            v1 = j * tex_step_y
+            v2 = v1 + tex_step_y
+
+            glTexCoord2f(u1, v1)
+            glVertex3f(x1, y1, 0)
+            glTexCoord2f(u2, v1)
+            glVertex3f(x2, y1, 0)
+            glTexCoord2f(u2, v2)
+            glVertex3f(x2, y2, 0)
+            glTexCoord2f(u1, v2)
+            glVertex3f(x1, y2, 0)
 
     glEnd()
     glDisable(GL_TEXTURE_2D)
+
 
     
 
