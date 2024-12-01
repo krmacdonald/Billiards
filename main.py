@@ -70,8 +70,9 @@ def init():
 
     #LIGHTING
     glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)  # Default light
     glEnable(GL_NORMALIZE)
-    glEnable(GL_DEPTH_TEST) 
+    glEnable(GL_DEPTH_TEST)
 
 def keyboard(event):
     global running, camera
@@ -157,10 +158,13 @@ def drawScene():
     
     camera.placeCamera()
 
-    #overhead colored lights #TODO add two other lights
+    #overhead colored lights 
     place_red_light()
     place_green_light()
     place_blue_light()
+
+    #overhead light
+    overhead_light(GL_LIGHT4)
 
     flashlight(GL_LIGHT0)
 
@@ -254,6 +258,47 @@ def place_blue_light():
     glColor3f(0.0, 0.0, 1.0)
     gluSphere(ball, 0.2, 100, 100)
     glEnable(GL_LIGHTING)
+    glPopMatrix()
+
+def overhead_light(light):
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    light_position = [2, 8, 15, 1.0]  # Ensure w-coordinate is 1.0 for positional light
+    rad = math.radians(FLASH_ANGLE)
+    light_direction = [math.sin(rad), 0.0, -math.cos(rad), 0.0]
+    light_ambient = [1.0, 1.0, 0.0, 1.0]
+    light_diffuse = [1.0, 1.0, 0.0, 1.0]
+    light_specular = [0.0, 1.0, 0.0, 1.0]
+
+    glLightfv(light, GL_POSITION, light_position)
+    glLightfv(light, GL_AMBIENT, light_ambient)
+    glLightfv(light, GL_DIFFUSE, light_diffuse)
+    glLightfv(light, GL_SPECULAR, light_specular)
+
+    glLightfv(light, GL_SPOT_DIRECTION, light_direction)
+    glLightf(light, GL_SPOT_CUTOFF, 30.0)
+    glLightf(light, GL_SPOT_EXPONENT, 5.0)
+
+    # Distance attenuation
+    glLightf(light, GL_CONSTANT_ATTENUATION, 1.0)  # Adjust attenuation values
+    glLightf(light, GL_LINEAR_ATTENUATION, 0.0)
+    glLightf(light, GL_QUADRATIC_ATTENUATION, 0.0)
+    glEnable(light)
+
+    # Ensure lighting is enabled
+    glEnable(GL_LIGHTING)
+    glEnable(GL_DEPTH_TEST)
+
+    # Draw the light source as a yellow sphere
+    # Does not work currently, light is functioning but not visible as sphere
+    glTranslate(light_position[0], light_position[1], light_position[2])
+    glDisable(GL_LIGHTING)
+    glColor3f(0.5, 0.5, 0.0)
+    gluSphere(gluNewQuadric(), 0.2, 100, 100)
+    glEnable(GL_LIGHTING)
+
     glPopMatrix()
 
 def flashlight(light):
