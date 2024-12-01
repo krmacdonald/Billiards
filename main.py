@@ -173,6 +173,13 @@ def drawScene():
     createWalls()
 
     glPushMatrix()
+
+    #one die
+    createDie() #TODO implement textures and add second dice
+    glTranslate(2.5, 0, 0)
+    createDie()
+    glTranslate(-2.5, 0, 0)
+    
     glTranslate(0, 10, 0)
     glRotate(90, 90, 0, 0)
     createCeiling()
@@ -265,7 +272,7 @@ def overhead_light(light):
     glPushMatrix()
     glLoadIdentity()
 
-    light_position = [2, 8, 15, 1.0]  # Ensure w-coordinate is 1.0 for positional light
+    light_position = [2, 8, 15, 1.0]  #1 for positional light
     rad = math.radians(FLASH_ANGLE)
     light_direction = [math.sin(rad), 0.0, -math.cos(rad), 0.0]
     light_ambient = [1.0, 1.0, 0.0, 1.0]
@@ -282,7 +289,7 @@ def overhead_light(light):
     glLightf(light, GL_SPOT_EXPONENT, 5.0)
 
     # Distance attenuation
-    glLightf(light, GL_CONSTANT_ATTENUATION, 1.0)  # Adjust attenuation values
+    glLightf(light, GL_CONSTANT_ATTENUATION, 1.0)  #adjust attenuation values
     glLightf(light, GL_LINEAR_ATTENUATION, 0.0)
     glLightf(light, GL_QUADRATIC_ATTENUATION, 0.0)
     glEnable(light)
@@ -342,6 +349,31 @@ def createWalls():
     glRotate(90, 0, 90, 0)
     glTranslate(WALL_LENGTH/2.0, 0, -WALL_LENGTH/2.0)
     draw_plane(WALL_LENGTH, WALL_HEIGHT, wall_tex_name)
+    glPopMatrix()
+
+def createDie():
+    dieWidth = 2
+
+    glPushMatrix()
+
+    #sides
+    draw_plane(dieWidth, dieWidth, wall_tex_name)
+    glRotate(90, 0, 90, 0)
+    glTranslate(-dieWidth/2.0, 0, -dieWidth/2.0)
+    draw_plane(dieWidth, dieWidth, wall_tex_name)
+    glTranslate(0, 0, dieWidth)
+    draw_plane(dieWidth, dieWidth, wall_tex_name)
+    glRotate(90, 0, 90, 0)
+    glTranslate(dieWidth/2.0, 0, -dieWidth/2.0)
+    draw_plane(dieWidth, dieWidth, wall_tex_name)
+    glPopMatrix()
+
+    #top and bottom
+    glPushMatrix()
+    glTranslate(0, dieWidth, 0)
+    glRotate(90, 90, 0, 0)
+    draw_plane(dieWidth, dieWidth, ceiling_tex_name) #top
+    draw_plane(dieWidth, dieWidth, floor_tex_name) #bottom
     glPopMatrix()
 
 def createTable():
