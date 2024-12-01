@@ -17,6 +17,7 @@ Y_BOUND = None
 Z_BOUND = 29
 FLASH_ANGLE = 0
 FPS = 30.0
+light_pos = utils.Point(0, 0, 0)
 
 ceiling_name = "textures/ceiling.jpeg"
 wall_name = "textures/wall.jpeg"
@@ -46,13 +47,17 @@ def main():
 
 
 def init():
-    global ceiling_tex_name, wall_tex_name, clock, floor_tex_name, pool_tex_name
+    global ceiling_tex_name, wall_tex_name, clock, floor_tex_name, pool_tex_name, ball
     pygame.init()
     screen = pygame.display.set_mode(window_dimensions, pygame.DOUBLEBUF|pygame.OPENGL)
     clock = pygame.time.Clock()
     pygame.key.set_repeat(300, 50)  # Key repeat rate
     running = True
     clock = pygame.time.Clock()
+
+    #ball quadric
+    ball = gluNewQuadric()
+    gluQuadricDrawStyle(ball, GLU_FILL)
 
     textArr = glGenTextures(3)  # Texture names for all three textures to create
     ceiling_tex_name = textArr[0]
@@ -61,7 +66,12 @@ def init():
     createTexture(ceiling_tex_name, ceiling_name)
     createTexture(wall_tex_name, wall_name)
     createTexture(pool_tex_name, pool_name)
-    floor_tex_name = generate_checkerboard_texture(9, 9, 30, [[0, 0, 0, 1], [255,255,255, 1]])
+    floor_tex_name = generate_checkerboard_texture(9, 9, 30, [[0, 0, 0, 1], [255,255,255, 1]]) 
+
+    #LIGHTING
+    glEnable(GL_LIGHTING)
+    glEnable(GL_NORMALIZE)
+    glEnable(GL_DEPTH_TEST) 
 
 def keyboard(event):
     global running, camera
@@ -125,16 +135,21 @@ def main_loop():
 def display():
     width = window_dimensions[0]
     height = window_dimensions[1]
-
     glViewport(0, 0, width, height)
+
     camera.setProjection()
+
     glClearColor(0.0, 0.0, 0.0, 0.0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glFlush()
+
+    #use smooth shading model
+    glShadeModel(GL_SMOOTH)
     
     drawScene()
     glFlush()
 
+    
 
 def drawScene():
     glEnable(GL_LIGHTING)
@@ -142,7 +157,14 @@ def drawScene():
     
     camera.placeCamera()
 
+    #overhead colored lights #TODO add two other lights
+    place_red_light()
+    place_green_light()
+    place_blue_light()
+
     flashlight(GL_LIGHT0)
+
+    
 
     createWalls()
 
@@ -152,6 +174,87 @@ def drawScene():
     createCeiling()
     glPopMatrix()
     createFloor()
+
+def place_red_light(): 
+    amb = [1.0,0,0,1.0] #no ambient to start
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb)
+
+    glMatrixMode(GL_MODELVIEW)
+    light_position = [-6, 9, 9, 1.0]
+    light_ambient = [1.0, 0.0, 0.0, 1.0]
+    light_diffuse = [1.0, 0.0, 0.0, 1.0]
+    light_specular = [1.0, 0.0, 0.0, 1.0]
+
+    #first colored light (red)
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position)
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient)
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse)
+    glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular)
+  
+
+    glEnable(GL_LIGHT1)
+
+    glPushMatrix()
+    glTranslate(light_position[0], light_position[1], light_position[2])
+    glDisable(GL_LIGHTING)
+    glColor3f(1.0, 0.0, 0.0)
+    gluSphere(ball, 0.2, 100, 100)
+    glEnable(GL_LIGHTING)
+    glPopMatrix()
+
+def place_green_light(): 
+    amb = [0.0,1,0,1.0] #no ambient to start
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb)
+
+    glMatrixMode(GL_MODELVIEW)
+    light_position = [6, 9, 5, 1.0]
+    light_ambient = [0.0, 1.0, 0.0, 1.0]
+    light_diffuse = [0.0, 1.0, 0.0, 1.0]
+    light_specular = [0.0, 1.0, 0.0, 1.0]
+
+    #second colored light (green)
+    glLightfv(GL_LIGHT2, GL_POSITION, light_position)
+    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient)
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse)
+    glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular)
+  
+
+    glEnable(GL_LIGHT2)
+
+    glPushMatrix()
+    glTranslate(light_position[0], light_position[1], light_position[2])
+    glDisable(GL_LIGHTING)
+    glColor3f(0.0, 1.0, 0.0)
+    gluSphere(ball, 0.2, 100, 100)
+    glEnable(GL_LIGHTING)
+    glPopMatrix()
+
+def place_blue_light(): 
+    amb = [0.0,0.0,1.0,1.0] #no ambient to start
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb)
+
+    glMatrixMode(GL_MODELVIEW)
+    light_position = [0, 9, 1, 1.0]
+    light_ambient = [0.0, 0.0, 1.0, 1.0]
+    light_diffuse = [0.0, 0.0, 1.0, 1.0]
+    light_specular = [0.0, 0.0, 1.0, 1.0]
+
+    #third colored light (blue)
+    glLightfv(GL_LIGHT3, GL_POSITION, light_position)
+    glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient)
+    glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse)
+    glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular)
+  
+
+    glEnable(GL_LIGHT3)
+
+    glPushMatrix()
+    glTranslate(light_position[0], light_position[1], light_position[2])
+    glDisable(GL_LIGHTING)
+    glColor3f(0.0, 0.0, 1.0)
+    gluSphere(ball, 0.2, 100, 100)
+    glEnable(GL_LIGHTING)
+    glPopMatrix()
 
 def flashlight(light):
     glMatrixMode(GL_MODELVIEW)
@@ -248,7 +351,6 @@ def createTexture(tName, fName):
     text = img.tobytes("raw")
     glBindTexture(GL_TEXTURE_2D, tName)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, text)
-
 
 #Creates a plane based on the provided width, height, and texture
 def draw_plane(width, height, texture, divisions_x=10, divisions_y=10):
